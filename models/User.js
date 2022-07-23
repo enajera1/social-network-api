@@ -4,15 +4,15 @@ const UserSchema = new Schema(
   {
     username: {
       type: String,
-      // unique. check assignments
+      unique: true,
       required: true,
       trim: true
     },
     email: {
       type: String,
       required: true,
-      //unique
-      // validate. (look into mongoose's matching validation)
+      unique: true,
+      match: [/.+\@.+\..+/] // match a valid email address
     },
     thoughts: [
       {
@@ -21,7 +21,11 @@ const UserSchema = new Schema(
       }
     ],
     friends: [
-      // array of _id values referencing the User model (self-reference)
+      {
+        type: Schema.Types.ObjectId,
+        // referring to the user document model 
+        ref: 'User'
+    }// array of _id values referencing the User model (self-reference)
     ]
   }, 
   {
@@ -33,8 +37,11 @@ const UserSchema = new Schema(
   }
 );
 //virtual
+// UserSchema.virtual('friendCount').get(function() {
+//   return this.friends.reduce((total, friends) => total + friends.length + 1, 0);
+// });
 UserSchema.virtual('friendCount').get(function() {
-  return this.friends.reduce((total, friends) => total + friends.length + 1, 0);
+  return this.friends.length;
 });
 
 const User = model('User', UserSchema);
